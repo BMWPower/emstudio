@@ -66,9 +66,11 @@ void TableMap3D::initializeGL()
 	qglClearColor(QColor::fromRgb(0,0,0));
 	glShadeModel(GL_SMOOTH);
 	glEnable (GL_LINE_SMOOTH);
+	glEnable (GL_MULTISAMPLE);
 	glEnable (GL_BLEND);
+	glEnable (GL_POLYGON_SMOOTH);
 	glHint (GL_LINE_SMOOTH_HINT, GL_NICEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glHint (GL_POLYGON_SMOOTH_HINT, GL_NICEST);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0,0,width(),height());
 	glMatrixMode(GL_PROJECTION);
@@ -89,7 +91,7 @@ void TableMap3D::paintGL()
 	glTranslatef(0,0,-2.4); //Move back 3 units
 	glRotatef(m_xrot, 1.0, 0.0, 0.0); //Rotate it up/down
 	glRotatef(m_yrot, 0.0, 0.0, 1.0); //Rotate it left/right
-	glTranslatef(-0.5,-0.5,-0.5); //Center the graph in view
+	glTranslatef(-0.5,-1+(0.5 * ((double)m_tableData->yAxis().size() / (double)m_tableData->xAxis().size())),-0.5); //Center the graph in view
 	//float minx = 0;
 	float maxx = 1;
 	float miny = 0;
@@ -169,12 +171,14 @@ void TableMap3D::paintGL()
 		{
 			if (i == 0 || i == 2)
 			{
-				glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-				glLineWidth(1.25);
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				glLineWidth(1.75);
 			}
 			else if (i == 1)
 			{
-				glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+				glBlendFunc(GL_ONE, GL_ZERO);
 				glLineWidth(1.25);
 			}
 			glBegin(GL_QUADS);
@@ -226,28 +230,28 @@ void TableMap3D::paintGL()
 				float y0 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
 				float x0 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 				float z0 = (float)m_tableData->values()[y][x] / m_tableData->maxZAxis();
-				glColor4f(r,g,b,0.99);
+				glColor4f(r,g,b,((i==0 || i==2) ? 0.9 : 1));
 				//glVertex3f(x0+((i==1) ? MAP3DCELLSPACING : 0),(maxy-y0)-((i==1) ? MAP3DCELLSPACING : 0),z0);
 				glVertex3f(x0,(maxy-y0),z0+((i==0) ? 0.001 : ((i==2) ? -0.001 : 0)));
 
 				float y1 = ((float)x * maxy)/((float)m_tableData->xAxis().size()-1.0);
 				float x1 = ((float)y+1)/((float)m_tableData->yAxis().size()-1.0);
 				float z1 = (float)m_tableData->values()[y+1][x] / m_tableData->maxZAxis();
-				glColor4f(r,g,b,0.99);
+				glColor4f(r,g,b,((i==0 || i==2) ? 0.9 : 1));
 				//glVertex3f(x1-((i==1) ? MAP3DCELLSPACING : 0),(maxy-y1)-((i==1) ? MAP3DCELLSPACING : 0),z1);
 				glVertex3f(x1,(maxy-y1),z1+((i==0) ? 0.001 : ((i==2) ? -0.001 : 0)));
 
 				float y2 = ((float)((x+1.0) * maxy))/((float)m_tableData->xAxis().size()-1.0);
 				float x2 = ((float)y+1.0)/((float)m_tableData->yAxis().size()-1.0);
 				float z2 = (float)m_tableData->values()[y+1][x+1] / m_tableData->maxZAxis();
-				glColor4f(r,g,b,0.99);
+				glColor4f(r,g,b,((i==0 || i==2) ? 0.9 : 1));
 				//glVertex3f(x2-((i==1) ? MAP3DCELLSPACING : 0),(maxy-y2)+((i==1) ? MAP3DCELLSPACING : 0),z2);
 				glVertex3f(x2,(maxy-y2),z2+((i==0) ? 0.001 : ((i==2) ? -0.001 : 0)));
 
 				float y3 = ((float)(x+1) * maxy)/((float)m_tableData->xAxis().size()-1.0);
 				float x3 = ((float)y)/((float)m_tableData->yAxis().size()-1.0);
 				float z3 = (float)m_tableData->values()[y][x+1]/m_tableData->maxZAxis();
-				glColor4f(r,g,b,0.99);
+				glColor4f(r,g,b,((i==0 || i==2) ? 0.9 : 1));
 				//glVertex3f(x3+((i==1) ? MAP3DCELLSPACING : 0),(maxy-y3)+((i==1) ? MAP3DCELLSPACING : 0),z3);
 				glVertex3f(x3,(maxy-y3),z3+((i==0) ? 0.001 : ((i==2) ? -0.001 : 0)));
 			}
